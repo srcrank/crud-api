@@ -1,0 +1,53 @@
+[
+  {
+    "url": "https://api.github.com/repos/rails/rails/issues/43101",
+    "id": 1,
+    "title": "Address `FixturesWithForeignKeyViolationsTest#test_does_not_raise_if_no_fk_violations` error",
+   
+    "user": "yahonda",
+
+    "labels": [
+      {
+        "id": 107191,
+        "name": "activerecord"
+      }
+    ],
+    "comments": 0,
+    "body": "### Summary\r\n\r\nThis pull request fixes the CI error at https://buildkite.com/rails/rails/builds/80548#e6a190c0-2ba5-41cf-8ebd-11ca6c4f6612\r\n\r\n- This commit addresses the following error\r\n\r\n```ruby\r\n$ bin/test test/cases/relation/and_test.rb test/cases/fixtures_test.rb -n \"/^(?:ActiveRecord::AndTest#(?:test_and)|FixturesWithForeignKeyViolationsTest#(?:test_does_not_raise_if_no_fk_violations))$/\" --seed 1987\r\nUsing sqlite3\r\nRun options: -n \"/^(?:ActiveRecord::AndTest#(?:test_and)|FixturesWithForeignKeyViolationsTest#(?:test_does_not_raise_if_no_fk_violations))$/\" --seed 1987\r\n\r\n.E\r\n\r\nError:\r\nFixturesWithForeignKeyViolationsTest#test_does_not_raise_if_no_fk_violations:\r\nRuntimeError: Foreign key violations found in your fixture data. Ensure you aren't referring to labels that don't exist on associations.\r\n    /home/yahonda/src/github.com/rails/rails/activerecord/lib/active_record/fixtures.rb:641:in `block in insert'\r\n    /home/yahonda/src/github.com/rails/rails/activerecord/lib/active_record/fixtures.rb:629:in `each'\r\n    /home/yahonda/src/github.com/rails/rails/activerecord/lib/active_record/fixtures.rb:629:in `insert'\r\n    /home/yahonda/src/github.com/rails/rails/activerecord/lib/active_record/fixtures.rb:615:in `read_and_insert'\r\n    /home/yahonda/src/github.com/rails/rails/activerecord/lib/active_record/fixtures.rb:567:in `create_fixtures'\r\n    /home/yahonda/src/github.com/rails/rails/activerecord/test/cases/fixtures_test.rb:846:in `block (2 levels) in test_does_not_raise_if_no_fk_violations'\r\n    /home/yahonda/src/github.com/rails/rails/activesupport/lib/active_support/testing/assertions.rb:34:in `assert_nothing_raised'\r\n    /home/yahonda/src/github.com/rails/rails/activerecord/test/cases/fixtures_test.rb:845:in `block in test_does_not_raise_if_no_fk_violations'\r\n    /home/yahonda/src/github.com/rails/rails/activerecord/test/cases/fixtures_test.rb:859:in `with_verify_foreign_keys_for_fixtures'\r\n    /home/yahonda/src/github.com/rails/rails/activerecord/test/cases/fixtures_test.rb:844:in `test_does_not_raise_if_no_fk_violations'\r\n\r\nbin/test test/cases/fixtures_test.rb:837\r\n\r\nFinished in 0.022298s, 89.6940 runs/s, 44.8470 assertions/s.\r\n2 runs, 1 assertions, 0 failures, 1 errors, 0 skips\r\n$\r\n```\r\n"
+  },
+  {
+    "url": "https://api.github.com/repos/rails/rails/issues/43100",
+    "id": 2,
+    "title": "Fix forceful creation of temporary tables",
+    "user": "iridakos",
+    "labels": [
+      {
+        "id": 107191,
+
+        "name": "activerecord"
+      }
+    ],
+
+    "comments": 0,
+    "body": "### Summary\r\n\r\nAs documented in #42525 in Rails 6.1.3.2, the following code:\r\n\r\n```ruby\r\nActiveRecord::Base.connection.create_table(:foo, force: true, temporary: true) { |t| t.string :name }\r\n```\r\n\r\nis issuing a non-temporary table drop with the same name when using the mysql2 adapter:\r\n\r\n```sql\r\nDROP TABLE IF EXISTS `foo`\r\nCREATE TEMPORARY TABLE `foo` (`id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY, `name` varchar(255))\r\n```\r\n\r\nThis PR fixes the issue by properly passing the `temporary` option (initially provided to the `create_table` call) to the `drop_table` call of the underlying adapter.\r\n\r\n### Notes \r\n\r\n1. I've added a related test in `activerecord/test/cases/adapters/mysql2/active_schema_test.rb` but if you believe that there's a better place to host it let me know and I will proceed to the required changes.\r\n\r\n2. In the test, I initially wrapped the table creation call in an AR transaction so that the following error would be raised without the fix\r\n  ```ruby\r\n  ActiveRecord::StatementInvalid:\r\n    Mysql2::Error: SAVEPOINT active_record_1 does not exist\r\n  ```\r\n  but reading the rest of the specs, I decided that using the `assert_sql` to check the generated SQL statements would be a better fit. What do you think?\r\n\r\n---\r\n\r\nFixes #42525\r\n"
+  },
+  {
+    "url": "https://api.github.com/repos/rails/rails/issues/43099",
+
+    "id": 3,
+
+    "title": "Fix `$LOAD_PATH` link in Autoloading Guides",
+    "user": "intrip",
+    "labels": [
+      {
+        "id": 150377,
+
+        "name": "docs"
+      }
+    ],
+
+    "comments": 0,
+
+    "body": "### Summary\r\n\r\nClicking on `$LOAD_PATH` link now properly scrolls to the related anchor.\r\n\r\nThe fix is done by providing explicitly the anchor id instead of using the generated one which includes the `$` special character.\r\n\r\n<!-- Provide a general description of the code changes in your pull\r\nrequest... were there any bugs you had fixed? If so, mention them. If\r\nthese bugs have open GitHub issues, be sure to tag them here as well,\r\nto keep the conversation linked together. -->\r\n\r\n<!-- If there's anything else that's important and relevant to your pull\r\nrequest, mention that information here. This could include\r\nbenchmarks, or other information.\r\n\r\nIf you are updating any of the CHANGELOG files or are asked to update the\r\nCHANGELOG files by reviewers, please add the CHANGELOG entry at the top of the file.\r\n\r\nFinally, if your pull request affects documentation or any non-code\r\nchanges, guidelines for those changes are [available\r\nhere](https://edgeguides.rubyonrails.org/contributing_to_ruby_on_rails.html#contributing-to-the-rails-documentation)\r\n\r\nThanks for contributing to Rails! -->\r\n"
+  }
+]

@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -7,6 +6,17 @@ export class Issue {
     id: number;
 
     @Column()
-    title: string;
-}
+    url: string;
 
+    @Column()
+    title: string;
+
+    @Column()
+    user: string;
+
+    @Column()
+    comments: number;
+
+    @Column()
+    body: string;
+}
